@@ -102,4 +102,4 @@ When generation is complete, report:
 1. **Mode** — Which mode was used (single-file or multi-file) and why.
 2. **Generated files** — List every file created, with its full path.
 3. **Summary of findings** — Brief summary of what customizations were found across each dimension.
-4. **Output path** — The full path to the generated skill directory: `{package-path}/skills/sdk-customization-guide/`
+4. **Output path** — The full path to the generated skill directory: `{package-path}/.github/skills/sdk-customization-guide/`
