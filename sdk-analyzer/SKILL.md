@@ -1,6 +1,6 @@
 ---
 name: sdk-analyzer
-description: Analyze an Azure Python SDK package and generate a customization guide skill. Use when you need to create or update a skill that documents how to add customizations to a specific SDK package.
+description: Analyze an Azure Python SDK package and generate a post-regeneration customization guide skill. Use when you need to create or update a skill that documents how to add customizations to a specific SDK package.
 ---
 
 # SDK Analyzer
@@ -77,13 +77,13 @@ Verify by confirming `sdk/` exists in the current directory before proceeding. I
 
 3. Check if the output directory already exists:
    ```
-   ls {package-path}/skills/sdk-customization-guide/ 2>/dev/null
+   ls {package-path}/.github/skills/{package-name}/ 2>/dev/null
    ```
    If it exists, warn the user that existing files will be overwritten, then proceed.
 
 4. Create the output directory:
    ```
-   mkdir -p {package-path}/skills/sdk-customization-guide/
+   mkdir -p {package-path}/.github/skills/{package-name}/
    ```
 
 5. Generate files using the templates from `skill-templates.md`, filling all placeholders with the analysis results from Step 3.
@@ -102,4 +102,5 @@ When generation is complete, report:
 1. **Mode** — Which mode was used (single-file or multi-file) and why.
 2. **Generated files** — List every file created, with its full path.
 3. **Summary of findings** — Brief summary of what customizations were found across each dimension.
-4. **Output path** — The full path to the generated skill directory: `{package-path}/.github/skills/sdk-customization-guide/`
+4. **Output path** — The full path to the generated skill directory: `{package-path}/.github/skills/{package-name}/`
+5. ** Skill name** — The name of the generated skill, which should be `{package-name}`.

@@ -1,4 +1,4 @@
-# Skill Templates for Generated Customization Guides
+# Skill Templates for Post-Regeneration Customization Guide
 
 ## Complexity Threshold
 
@@ -17,7 +17,7 @@
 Write all generated files to:
 
 ```
-{package-path}/skills/sdk-customization-guide/
+{package-path}/.github/skills/{package-name}/
 ```
 
 If the directory already exists, inform the user that existing files will be overwritten, then proceed.
@@ -30,11 +30,11 @@ Generate one file: `SKILL.md`
 
 ````markdown
 ---
-name: {package-name}-customization-guide
+name: {package-name}
 description: Customization patterns and conventions for {package-name}. Use when adding new customizations to this SDK package.
 ---
 
-# {package-name} Customization Guide
+# {package-name} - Post-Regeneration Customization Guide
 
 ## Overview
 
@@ -130,7 +130,7 @@ Generate the following files. Omit sub-files (not `SKILL.md`) for dimensions whe
 
 ````markdown
 ---
-name: {package-name}-customization-guide
+name: {package-name}
 description: Customization patterns and conventions for {package-name}. Use when adding new customizations to this SDK package.
 ---
 
