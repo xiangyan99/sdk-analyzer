@@ -203,3 +203,54 @@ Pair: {sync_file} <-> {async_file}
   Differences: {list or "none"}
   Shared code: {list of shared modules/classes}
 ```
+
+---
+
+## Dimension 7: Import Dependencies & Regeneration Risks
+
+This dimension identifies the fragile links between customization files and generated code — the exact points that break when regeneration changes the generated API. This data drives the post-regeneration verification steps in the generated skill.
+
+**Scan targets:** All non-empty `_patch.py` files and all utility files (from Dimension 5).
+
+**What to extract:**
+
+1. **Import map** — For each customization file, list every symbol imported from generated modules (`_generated/` directory or files containing the generated code header). Record the exact import statements. These are the imports that can break after regeneration.
+2. **ApiVersion enum** — Detect if a hand-maintained `ApiVersion` enum or similar version constant exists outside `_generated/`. Record its location, all defined version members, and the current default value (`DEFAULT_VERSION` or equivalent). If none exists, record as absent.
+3. **Monkey-patching** — Detect patterns where customization code modifies generated objects at runtime: adding class attributes, patching staticmethods onto generated enums, adding backward-compatible aliases (e.g., `GeneratedEnum.OldName = GeneratedEnum.NEW_NAME`). These break silently if the generated target is renamed or removed.
+4. **Shared helpers** — Functions or classes defined in one customization file and imported by other customization files. Especially note sync helpers imported by async code (these must not be duplicated). Record the defining file and all importing files.
+5. **Hand-authored classes** — Classes in customization files that do NOT subclass any generated class. These are entirely custom implementations (e.g., buffered senders, custom iterators, custom error types). They still may import generated types and break if those types change.
+6. **Constructor reordering** — Detect where a custom client class changes the parameter order of `__init__` relative to its generated base class (e.g., swapping `credential` and `index_name` for better ergonomics).
+7. **Wire format helpers** — Functions that construct or transform wire-format request/response data (e.g., encoding parameters into pipe-delimited strings, Base64-encoded continuation tokens, custom serialization of search metadata fields). These break when the wire protocol or model schema changes.
+8. **Named patterns** — Identify and name each distinct customization pattern found across all dimensions. A pattern is a reusable technique applied one or more times (e.g., "Polymorphic Delete", "Custom Pagination", "Enum Aliases", "Field Builders"). For each pattern, record: the name, a one-sentence description, which files implement it, and what generated symbols it depends on.
+
+**Record format:**
+
+```
+File: {relative path}
+  Generated imports: [{module}: {symbol1, symbol2, ...}]
+
+ApiVersion:
+  Location: {file path or "not found"}
+  Members: [{version_name} = "{version_string}", ...]
+  Default: {DEFAULT_VERSION value or "N/A"}
+
+Monkey-patches:
+  {target_class}.{attribute} = {value/description} (in {file})
+
+Shared helpers:
+  {function_name} defined in {file}, imported by [{file1, file2, ...}]
+
+Hand-authored classes:
+  {ClassName} in {file} — {one-line purpose}
+
+Constructor reordering:
+  {ClassName} in {file}: generated({param_order}) → custom({param_order})
+
+Wire format helpers:
+  {function_name} in {file} — {description of encoding/transformation}
+
+Named patterns:
+  {PatternName}: {one-sentence description}
+    Files: [{file1, file2, ...}]
+    Depends on: [{generated_symbol1, generated_symbol2, ...}]
+```

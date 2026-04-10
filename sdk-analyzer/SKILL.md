@@ -57,15 +57,16 @@ Verify by confirming `sdk/` exists in the current directory before proceeding. I
 ## Step 3: Analyze by Dimension
 
 1. Read `analysis-dimensions.md` from this skill's directory.
-2. Follow its instructions to analyze all 6 dimensions:
+2. Follow its instructions to analyze all 7 dimensions:
    - Dimension 1: Client Layer
    - Dimension 2: Model Layer
    - Dimension 3: Operations Layer
    - Dimension 4: Public API Surface
    - Dimension 5: Utilities & Policies
    - Dimension 6: Async Parity
+   - Dimension 7: Import Dependencies & Regeneration Risks
 3. For each dimension, read the actual source files using the Read tool. Do not guess or infer file contents.
-4. Record findings in the format specified by each dimension's record format.
+4. Record findings in the format specified by each dimension's record format. Dimension 7 findings are critical — they drive the post-regeneration verification steps and named patterns reference in the generated skill.
 
 ## Step 4: Determine Complexity and Generate
 
@@ -89,10 +90,13 @@ Verify by confirming `sdk/` exists in the current directory before proceeding. I
 5. Generate files using the templates from `skill-templates.md`, filling all placeholders with the analysis results from Step 3.
 
 6. Key generation rules:
+   - The generated skill MUST make it unmistakably clear that auto-generated files MUST NOT be edited. This warning must appear in: the critical warning block at the top, the File Map section, and the Rules section.
    - Use actual code snippets extracted from the SDK source files. Never fabricate examples.
    - Reference real file paths, class names, and method names found during analysis.
+   - Generate the Post-Regeneration Verification section using Dimension 7 findings: import verification commands from the import map, ApiVersion checks if an ApiVersion enum was found, operation wrapper guidance from Dimension 3, model/enum impact checklist from monkey-patches and import dependencies.
+   - Generate the Customization Patterns Reference section using the named patterns from Dimension 7. Each pattern gets a subsection with description, location, generated dependencies, code example, and verification step.
    - Omit sections/sub-files for dimensions where the analysis found nothing.
-   - **Never omit** these sections regardless of findings: Overview, File Map (including the `_generated/` warning), Async Parity, Rules.
+   - **Never omit** these sections regardless of findings: the critical warning, File Map (including the `_generated/` warning), Post-Regeneration Verification (at minimum Steps 1, 5, 6, 7), Async Parity, Rules.
    - In multi-file mode, do not generate sub-files for empty dimensions.
 
 ## Step 5: Report
