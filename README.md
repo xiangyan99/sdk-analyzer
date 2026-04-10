@@ -8,14 +8,15 @@ Given an Azure SDK package name (e.g., `azure-ai-projects`), the skill:
 
 1. **Locates** the package under the `azure-sdk-for-python` repo's `sdk/` directory
 2. **Scans and classifies** all `.py` files as generated, patch, init, or utility
-3. **Analyzes 6 dimensions** of customization patterns:
+3. **Analyzes 7 dimensions** of customization patterns:
    - **Client Layer** — custom client classes, constructor changes, method overrides, pipeline policies
    - **Model Layer** — custom models, added fields, serialization overrides
    - **Operations Layer** — operation overrides, LRO/paging customizations
    - **Public API Surface** — `__init__.py` re-exports, symbol renaming, added/removed exports
    - **Utilities & Policies** — helper modules, custom pipeline policies, constants
    - **Async Parity** — sync/async consistency checks
-4. **Generates** a customization guide skill (single-file or multi-file based on complexity) at `{package-path}/skills/sdk-customization-guide/`
+   - **Import Dependencies & Regeneration Risks** — import maps, ApiVersion enums, monkey-patches, wire format helpers, named patterns
+4. **Generates** a customization guide skill (single-file or multi-file based on complexity) at `{package-path}/.github/skills/{package-name}/`
 
 ## Prerequisites
 
@@ -40,6 +41,6 @@ Invoke the skill in GitHub Copilot by asking it to analyze a package:
 ```
 sdk-analyzer/
   SKILL.md                 # Main skill definition and workflow
-  analysis-dimensions.md   # The 6 analysis dimensions with scan targets and record formats
+  analysis-dimensions.md   # The 7 analysis dimensions with scan targets and record formats
   skill-templates.md       # Output templates for single-file and multi-file modes
 ```
