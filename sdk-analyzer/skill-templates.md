@@ -63,15 +63,45 @@ If any import fails, find the new name in regenerated code and update the `_patc
 {If ApiVersion enum was detected:}
 
 ```bash
-python -c "import json; print(json.load(open('_metadata.json'))['apiVersion'])"
+python -c "import json; print(json.load(open('{metadata_json_path}'))['apiVersion'])"
 grep -A 20 'class ApiVersion' {file}
 ```
 
-If the new version is missing, add it to the `ApiVersion` enum and update `DEFAULT_VERSION`.
+Compare the API version from `_metadata.json` (or the generated client configuration) against the members of the `ApiVersion` enum. If the new version is not listed:
+1. Add the new version string to the `ApiVersion` enum.
+2. Update `DEFAULT_VERSION` to point to the new version.
 
 {If no ApiVersion enum — omit this step.}
 
-### Step 3: Run Static Analysis
+### Step 3: Check for New Parameters in Overridden Methods
+
+For each method that `_patch.py` overrides from a generated base, compare the generated method's current signature with the override. New parameters added by regeneration must be accepted and passed through.
+
+```bash
+{For each overridden method, emit a grep pair:}
+# {method_name} — generated signature
+grep -A 10 'def {method_name}' {generated_file}
+# {method_name} — patch override
+grep -A 10 'def {method_name}' {patch_file}
+```
+
+If the generated method has new parameters that the `_patch.py` override does not accept, update the override signature to include them and pass them to `super()` or the wrapped call.
+
+### Step 4: Check for New Model Properties
+
+For each model that `_patch.py` customizes by extending a generated model, check whether the generated base model has new properties.
+
+```bash
+{For each customized model, emit a grep pair:}
+# {model_name} — generated base properties
+grep -B 2 -A 30 'class {model_name}' {generated_model_file}
+# {model_name} — customized model
+grep -B 2 -A 30 'class {model_name}' {patch_file}
+```
+
+If the generated base model has new properties, ensure the customized model handles them (passes them through to `super().__init__()`, exposes them, etc.).
+
+### Step 5: Run Static Analysis
 
 ```bash
 cd {package-path}
@@ -79,7 +109,7 @@ azpysdk mypy
 azpysdk pylint
 ```
 
-### Step 4: Update Changelog
+### Step 6: Update Changelog
 
 Add entries to the `## (Unreleased)` section of `CHANGELOG.md` under `### Features Added`, `### Breaking Changes`, or `### Bugs Fixed` as appropriate.
 
@@ -118,5 +148,5 @@ Add entries to the `## (Unreleased)` section of `CHANGELOG.md` under `### Featur
 
 1. **Real code examples only** — all code blocks must be extracted from the actual SDK package. Never fabricate examples.
 2. **Package-specific content** — all descriptions and rules must be specific to the package under analysis.
-3. **Omit empty sections cleanly** — remove subsections for dimensions with no findings. **Never omit:** the critical warning, File Map, Post-Regeneration Verification (at minimum Steps 1, 3, 4), Async Parity, Rules.
+3. **Omit empty sections cleanly** — remove subsections for dimensions with no findings. **Never omit:** the critical warning, File Map, Post-Regeneration Verification (at minimum Steps 1, 5, 6), Async Parity, Rules. Include Steps 2–4 whenever ApiVersion enums, overridden methods, or customized models are detected.
 4. **Import dependency map present** — the File Map must list which generated symbols each customization file imports.

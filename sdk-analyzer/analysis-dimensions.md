@@ -48,9 +48,11 @@ Covers clients, models, operations, and utilities in a single pass.
 
 1. Classes — name, base class, purpose (client, model, policy, helper, etc.)
 2. Key methods — overrides of generated methods, new public methods, with signatures
-3. Constructor changes — added/modified parameters, credential wrapping, policy injection
-4. LRO/paging customizations — custom polling or pagination behavior
-5. Constants and enums — module-level constants, hand-maintained `ApiVersion` enum if present
+3. **Generated base signatures** — for each method that overrides or wraps a generated method, record the generated method's full signature (all parameters with types and defaults) from the generated source file. This is needed to detect new parameters after regeneration.
+4. Constructor changes — added/modified parameters, credential wrapping, policy injection
+5. LRO/paging customizations — custom polling or pagination behavior
+6. Constants and enums — module-level constants, hand-maintained `ApiVersion` enum if present
+7. **Generated model properties** — for each model class that extends or customizes a generated model, record all properties/fields defined in the generated base model. This is needed to detect new properties after regeneration.
 
 **Record format:**
 
@@ -59,9 +61,11 @@ File: {relative path}
   Category: {client | model | operations | utility}
   Classes: {name (base) — purpose}
   Key methods: {name — override|new, one-line summary}
+  Generated base signatures: {method_name}({param1}: {type1}, {param2}: {type2} = {default}, ...) in {generated_file}
   Constructor changes: {description or "none"}
   LRO/Paging: {description or "none"}
   Constants: {name = value}
+  Generated model properties: {model_name} has [{prop1}: {type1}, {prop2}: {type2}, ...] in {generated_file}
 ```
 
 ---
@@ -99,9 +103,11 @@ Identifies fragile links between customization files and generated code. Drives 
 **What to extract:**
 
 1. **Import map** — for each customization file, every symbol imported from generated modules. Record exact import statements.
-2. **ApiVersion enum** — location, members, default value (or "not found").
+2. **ApiVersion enum** — location, members, default value (or "not found"). Also record the current API version from `_metadata.json` or the generated client configuration for comparison.
 3. **Monkey-patches** — runtime modifications to generated objects (e.g., `GeneratedEnum.OldName = GeneratedEnum.NEW_NAME`).
 4. **Named patterns** — each distinct customization technique (e.g., "Enum Aliases", "Custom Pagination", "Field Builders"). Record: name, one-sentence description, files, generated symbol dependencies.
+5. **Method signature dependencies** — for each method in `_patch.py` that overrides or wraps a generated method, record the generated method's full parameter list. These are fragile: regeneration may add new parameters that the override must pass through.
+6. **Model property dependencies** — for each model in `_patch.py` that extends a generated model, record all properties defined on the generated base model. These are fragile: regeneration may add new properties that the customized model must handle.
 
 **Record format:**
 
@@ -113,6 +119,7 @@ ApiVersion:
   Location: {file path or "not found"}
   Members: [{version_name} = "{version_string}", ...]
   Default: {DEFAULT_VERSION value or "N/A"}
+  Generated API version: {version from _metadata.json or generated config}
 
 Monkey-patches:
   {target_class}.{attribute} = {value} (in {file})
@@ -121,4 +128,10 @@ Named patterns:
   {PatternName}: {description}
     Files: [{file1, file2}]
     Depends on: [{generated_symbol1, generated_symbol2}]
+
+Method signature dependencies:
+  {patch_file}::{method_name} overrides {generated_file}::{method_name}({full_param_list})
+
+Model property dependencies:
+  {patch_file}::{model_name} extends {generated_file}::{model_name} with properties [{prop1}, {prop2}, ...]
 ```

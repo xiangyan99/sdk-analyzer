@@ -79,10 +79,10 @@ Verify by confirming `sdk/` exists in the current directory before proceeding. I
    - The generated skill MUST make it clear that auto-generated files MUST NOT be edited. This warning must appear in the critical warning block, File Map, and Rules.
    - Use actual code snippets extracted from the SDK source files. Never fabricate examples.
    - Reference real file paths, class names, and method names found during analysis.
-   - Generate the Post-Regeneration Verification section using Dimension 3 findings: import verification commands from the import map, ApiVersion checks if detected.
+   - Generate the Post-Regeneration Verification section using Dimension 3 findings: import verification commands from the import map, ApiVersion checks if detected (comparing `_metadata.json` version against enum members), method signature comparisons for every overridden method, and model property comparisons for every customized model.
    - Generate the Customization Patterns section using Dimension 1 findings, grouped by category.
    - Omit subsections for dimensions where the analysis found nothing.
-   - **Never omit:** the critical warning, File Map, Post-Regeneration Verification (at minimum Steps 1, 3, 4), Async Parity, Rules.
+   - **Never omit:** the critical warning, File Map, Post-Regeneration Verification (at minimum Steps 1, 5, 6; include Steps 2–4 whenever ApiVersion enums, overridden methods, or customized models are detected), Async Parity, Rules.
 
 ## Step 5: Report
 
